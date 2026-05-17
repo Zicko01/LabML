@@ -6,10 +6,10 @@ class PCA():
     PCA implementation.
 
     Attributes:
-        C (np.ndarray): Mean vector of shape (d,).
-        U (np.ndarray): Principal directions of shape (d, d), where each
+        C (numpy.ndarray): Mean vector of shape (d,).
+        U (numpy.ndarray): Principal directions of shape (d, d), where each
             column represents a principal component.
-        D (np.ndarray): Principal values of shape (d,), sorted in
+        D (numpy.ndarray): Principal values of shape (d,), sorted in
             descending order.
     """
 
@@ -18,7 +18,7 @@ class PCA():
         Initializes PCA components from the training data.
 
         Args:
-            Xtrain (np.ndarray): Training dataset of shape (n, d),
+            Xtrain (numpy.ndarray): Training dataset of shape (n, d),
                 where n is the number of samples and d is the number
                 of features.
         """
@@ -43,11 +43,11 @@ class PCA():
         of test samples.
 
         Args:
-            Xtest (np.ndarray): Test dataset of shape (n, d).
+            Xtest (numpy.ndarray): Test dataset of shape (n, d).
             m (int): Number of principal components to use.
 
         Returns:
-            np.ndarray: Projected data of shape (n, m).
+            numpy.ndarray: Projected data of shape (n, m).
         """
         U_m = self.U[:, :m]
         Z = (Xtest - self.C) @ U_m
@@ -66,11 +66,11 @@ class PCA():
         of test samples.
 
         Args:
-            Xtest (np.ndarray): Test dataset of shape (n, d).
+            Xtest (numpy.ndarray): Test dataset of shape (n, d).
             m (int): Number of principal components to use.
 
         Returns:
-            np.ndarray: Reconstructed (denoised) data of shape (n, d).
+            numpy.ndarray: Reconstructed (denoised) data of shape (n, d).
         """
         Z = self.project(Xtest, m)
         U_m = self.U[:, :m]
@@ -82,12 +82,12 @@ def gammaidx(X, k):
     """
     Compute the gamma index for each sample in X with respect to the k nearest neighbors.
 
-    Parameters:
-    X (numpy.ndarray): The input data of shape (n, d).
-    k (int): The number of nearest neighbors to consider.
+    Args:
+        X (numpy.ndarray): The input data of shape (n, d).
+        k (int): The number of nearest neighbors to consider.
 
     Returns:
-    numpy.ndarray: An array of gamma indices for each sample.
+        numpy.ndarray: An array of gamma indices for each sample.
     """
     n = X.shape[0]
     y = np.zeros(n)
