@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+from scipy.cluster.hierarchy import dendrogram
 
 def kmeans(X, k, max_iter=100):
     n, d = X.shape
@@ -23,6 +24,105 @@ def kmeans(X, k, max_iter=100):
         centers = new_centers
 
     return centers, nearest, loss
+
+def kmeans_loss(X, r):
+    loss = 0.0
+
+    for c in np.unique(r):
+        points = X[r == c]
+
+        centroid = np.mean(points, axis=0)
+        loss += np.sum((points - centroid) ** 2)
+
+    return loss
+
+def kmeans_agglo(X, r):
+    clusters = np.unique(r)
+    k = len(clusters)
+    n = len(r)
+
+    if k < 2:
+        raise ValueError(
+            f"Need at least 2 clusters, got {k}."
+        )
+
+    R = np.zeros((k - 1, n), dtype=int)
+    kmloss = np.zeros(k)
+    mergeidx = np.zeros((k - 1, 2), dtype=int)
+
+    R[0] = r
+    kmloss[0] = kmeans_loss(X, r)
+
+    current_r = r.copy()
+
+    for step in range(k - 1):
+
+        current_clusters = np.unique(current_r)
+
+        best_loss = np.inf
+        best_r = None
+        best_pair = None
+
+        for i in range(len(current_clusters)):
+            for j in range(i + 1, len(current_clusters)):
+
+                c1 = current_clusters[i]
+                c2 = current_clusters[j]
+
+                trial_r = current_r.copy()
+
+                # merge c2 into c1
+                new_idx = max(trial_r) + 1
+                trial_r[trial_r == c1] = new_idx
+                trial_r[trial_r == c2] = new_idx
+
+                loss = kmeans_loss(X, trial_r)
+
+                if loss < best_loss:
+                    best_loss = loss
+                    best_r = trial_r
+                    best_pair = (c1, c2)
+
+        mergeidx[step] = best_pair
+        kmloss[step + 1] = best_loss
+
+        current_r = best_r
+
+        if step + 1 < k - 1:
+            R[step + 1] = current_r
+
+    return R, kmloss, mergeidx
+
+def agglo_dendro(kmloss, mergeidx):
+    m = mergeidx.shape[0]
+    k = m + 1
+
+    Z = np.zeros((m, 4))
+
+    sizes = {i: 1 for i in range(k)}
+
+    for i in range(m):
+        c1, c2 = mergeidx[i]
+
+        Z[i, 0] = c1
+        Z[i, 1] = c2
+        Z[i, 2] = kmloss[i + 1] - kmloss[i]
+
+        new_cluster = k + i
+
+        size1 = sizes[c1]
+        size2 = sizes[c2]
+
+        Z[i, 3] = size1 + size2
+
+        sizes[new_cluster] = size1 + size2
+
+    plt.figure(figsize=(8, 5))
+    dendrogram(Z)
+    plt.xlabel("Cluster index")
+    plt.ylabel("Increase in criterion function")
+    plt.title("Hierarchical cluster dendrogram")
+    plt.show()
 
 def norm_pdf(X, mu, C):
     n, d = X.shape
