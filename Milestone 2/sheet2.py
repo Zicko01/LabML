@@ -127,15 +127,17 @@ def agglo_dendro(kmloss, mergeidx):
 def norm_pdf(X, mu, C):
     n, d = X.shape
 
-    eps = 1e-8
+    eps = 1e-4
     C = C + eps * np.eye(d)
 
     X_centered = X - mu
 
     C_inv = np.linalg.solve(C, np.eye(d))
     det_C = np.linalg.det(C)
+    det_C = max(det_C, 1e-300)
 
     exponent = -0.5 * np.sum((X_centered @ C_inv) * X_centered, axis=1)
+    exponent = np.maximum(exponent, -700)
 
     const = 1.0 / np.sqrt(((2 * np.pi) ** d) * det_C)
 
@@ -160,6 +162,7 @@ def em_gmm(X, k, max_iter=100, init_kmeans=False, tol=1e-5):
         for j in range(k):
             gamma[:, j] = pi[j] * norm_pdf(X, mu[j], sigma[j])
         gamma_sum = np.sum(gamma, axis=1, keepdims=True)
+        gamma_sum = np.maximum(gamma_sum, 1e-300)
         gamma = gamma / gamma_sum
 
         Nk = np.sum(gamma, axis=0)
