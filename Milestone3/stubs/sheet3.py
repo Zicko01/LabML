@@ -17,7 +17,7 @@ def cv(X, y, method, params, loss_function= mean_absolute_error, nfolds=10, nrep
     n, d = X.shape
     cv_loss_min = np.inf
     param_combo = it.product(*params.values())
-    n_params = np.prod([len(x) for x in params])
+    n_params = np.prod([len(x) for x in params.values()])
     for itr, param in  enumerate(param_combo):
         if itr == 0:
             start_time = time.perf_counter()
