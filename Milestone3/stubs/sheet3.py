@@ -42,7 +42,7 @@ def cv(X, y, method, params, loss_function= mean_absolute_error, nfolds=10, nrep
         if n_params == 1:
             return cv_loss
 
-        if cv_loss_min > error:
+        if cv_loss_min > cv_loss:
             cv_loss_min = cv_loss
             param_best = param
 
@@ -66,7 +66,7 @@ class krr():
     def fit(self, X, y):
         n, d = X.shape
         self.X_train = X
-        # TODO: ask which kernel to use when kernel=False
+        # TODO: ask which kernel to use when kernel=Falsex
         if self.kernel == "linear":
             K = X @ X.T
         elif self.kernel == "polynomial":
