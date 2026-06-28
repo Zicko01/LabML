@@ -19,6 +19,10 @@ def cv(X, y, method, params, loss_function= mean_absolute_error, nfolds=10, nrep
     param_combo = it.product(*params.values())
     n_params = np.prod([len(x) for x in params.values()])
     for itr, param in  enumerate(param_combo):
+        if param[0] == "polynomial":
+            if not isinstance(param[1], int):
+                continue
+
         if itr == 0:
             start_time = time.perf_counter()
         method_with_param = method(*param)
@@ -39,6 +43,7 @@ def cv(X, y, method, params, loss_function= mean_absolute_error, nfolds=10, nrep
                 error += loss_function(y_test, y_pred)
 
         cv_loss = error / nfolds / nrepetitions
+
         if n_params == 1:
             return cv_loss
 
@@ -96,7 +101,7 @@ class krr():
                     val_loss_min = val_loss
                     self.regularization = c
         else:
-            self.alpha = np.linalg.solve(K + self.regularization * np.eye(n), y)
+            self.alpha = np.linalg.solve(K + (self.regularization + 1e-4) * np.eye(n), y)
         return self
 
     def predict(self, X):
@@ -109,5 +114,4 @@ class krr():
             sqnorms_X_train = np.sum(self.X_train**2, axis=1)
             sqdist = sqnorms_X[:, None] + sqnorms_X_train[None, :] - 2 * X @ self.X_train.T
             K = np.exp(-sqdist / (2 * self.kernelparameter**2))
-
         return K @ self.alpha
